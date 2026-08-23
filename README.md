@@ -25,18 +25,24 @@ automatizarlo una vez por mes es barato.
 - Compara contra la inflación que efectivamente aplica
 - Modela una **tabla de escenarios** con todo el abanico de mezclas: rendimiento, rendimiento
   real, peor caída histórica, y valor si esa caída pega al final del horizonte
+- Releva **instrumentos en pesos** (plazo fijo, FCI money market, LECAPs) y publica el punto de
+  equilibrio contra dolarizar: cuánto puede subir el dólar antes de que el peso pierda
+- Cuantifica el **costo de mover fondos** —comisiones de red y de retiro— al lado de cada
+  optimización, con su período de repago
+- Cuantifica los **impuestos que efectivamente aplican**: Bienes Personales y Ganancias, no solo
+  el sucesorio de EE.UU.
+- **Vigila cambios de reglas**, no de precios: términos, contrapartes, escalones y campañas.
+  Cuando cambia la letra chica, avisa
 - Detecta cambios materiales mes contra mes y avisa por Discord
+- Mantiene una serie histórica (`reports/history.json`) y grafica la tendencia corrida a corrida
+  en el tablero — el mismo enlace de siempre, no un artefacto nuevo cada vez
 
 ## Qué no hace
 
-- **No recomienda un porcentaje de asignación.** La tabla muestra todas las filas; la elección
-  es de quien lee. La columna "peor caída" descarta filas sola.
-- **No elige acciones ni CEDEARs.** SPIVA: 84,3 % de los gestores profesionales pierden contra
-  el índice a 10 años, 89,5 % a 15. La selección individual es lo que la evidencia desaconseja.
-- **No predice precios a partir de noticias.** No es una limitación técnica: nadie lo hace bien
-  de forma consistente, y fingirlo genera confianza falsa.
-- Los retornos históricos de renta variable que usa **no son pronósticos**, y el reporte lo dice
-  cada vez.
+- **No emite órdenes de compra ni de venta.** La salida es dato, relevamiento y análisis; la
+  lectura y la decisión son de quien lee. La tabla de escenarios muestra todas las filas.
+- Los retornos históricos de renta variable que usa **no son pronósticos**, y el reporte lo
+  aclara cada vez que los cita.
 
 ## Lo más útil de este repo
 
