@@ -1,0 +1,16 @@
+# ---- DATOS SENSIBLES — NUNCA COMMITEAR ----
+# El repo es publico. Todo lo que tenga montos, tenencias o credenciales vive aca.
+.env
+.env.*
+!.env.example
+
+# Reportes generados: contienen la posicion real. Se quedan en local.
+reports/*
+!reports/.gitkeep
+
+# ---- ruido ----
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+node_modules/
