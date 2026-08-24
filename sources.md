@@ -90,6 +90,36 @@ const re = /flexRate\\":([0-9.]+),\\"fixedRate\\":([0-9.]+)[^]{0,900}?slugUpper\
 Todo lo que publica Nexo son **máximos** (nivel Platinum). La tasa del nivel Base solo se ve
 dentro de la app logueado — el reporte marca ese hueco, no lo estima.
 
+### App logueada: lo que sí y no se pudo sacar (verificado 2026-08-24)
+
+Con sesión iniciada en `platform.nexo.com` (vía extensión de Chrome, sin credenciales manuales):
+
+- **Los badges "Ganá hasta X%" que muestra la app logueada son el mismo máximo de Platinum**
+  que ve un visitante sin cuenta — no cambian por tener sesión iniciada ni por el nivel real.
+- **Nivel confirmado por API**, no por UI: `POST /api/platform/loyalty/v1/tiers` (sin body)
+  devuelve `tiers[].name` con los 4 niveles (`base`, `silver`, `gold`, `platinum`); no trae
+  `min_usd_balance` — el umbral real no vive ahí, se calcula en otro lado.
+- **La confirmación de tasa por nivel no está en ningún endpoint público del propio front.**
+  Se probaron `loyalty/v1/rates`, `loyalty/v1/config`, `earn/v1/rates`, `savings/v1/rates`,
+  `fincore/v1/interest-rates` — todos devuelven la SPA (HTML) en vez de datos, es decir, no
+  son rutas reales de API.
+- **Hallazgo real: el "hasta 13% en USDC / 7,5% en ETH"** que aparece en el modal de fidelización
+  (`Mejora tu experiencia en Nexo`) **no es la tasa estándar de Platinum** — el propio modal
+  aclara "Habilitá 'Ganar en NEXO' para potenciar aún más la generación de intereses": ese % más
+  alto exige aceptar el interés pagado **en token NEXO**, no en la moneda depositada. Es un
+  mecanismo distinto (exposición al token de la plataforma), no comparable línea a línea con el
+  11,50%/10,50% ya verificado en la página pública.
+- **Trampa de automatización:** los `<span>` de texto en React a veces no responden a un click
+  por coordenadas de pantalla ni por `ref.click()` de accesibilidad — hace falta
+  `document.querySelectorAll` + `.click()` sobre el nodo de texto exacto para disparar el
+  handler.
+- **Trampa de API:** `fetch()` a rutas `/api/1/*` con **GET** devuelve `access denied` (HTML);
+  las mismas rutas con **POST** y body `{}` sí funcionan (`get_balances` confirmado así).
+
+**No se pudo cerrar:** la tasa real de Base para USDT/USDC, ni la de Platinum sin el boost de
+NEXO. La cuenta usada para probar tiene saldo 0, lo que bloquea llegar a la pantalla real de
+creación de plazo fijo (cualquier click en la fila del activo abre "Recibir", no "Ganar").
+
 ### Términos y campañas
 
 - `https://nexo.com/es-ar/terms` — Anexo III art. I.3 nombra los proveedores Earn reales.
