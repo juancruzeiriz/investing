@@ -87,38 +87,58 @@ const re = /flexRate\\":([0-9.]+),\\"fixedRate\\":([0-9.]+)[^]{0,900}?slugUpper\
 > exactamente el "hasta 11,5%" que publica la página. Confundirlos hace ver un plazo fijo que
 > paga menos que la cuenta flexible, lo cual no tiene sentido económico.
 
-Todo lo que publica Nexo son **máximos** (nivel Platinum). La tasa del nivel Base solo se ve
-dentro de la app logueado — el reporte marca ese hueco, no lo estima.
+Todo lo que publica Nexo **fuera de la cuenta** son máximos (nivel Platinum, sin login).
 
-### App logueada: lo que sí y no se pudo sacar (verificado 2026-08-24)
+### La fuente que sí funciona: `platform.nexo.com/savings-breakdown`
 
-Con sesión iniciada en `platform.nexo.com` (vía extensión de Chrome, sin credenciales manuales):
+**Verificado 2026-08-24 — esta es la fuente definitiva, no hace falta nada más.** Logueado, sin
+necesitar saldo en la cuenta (a diferencia de la pantalla de creación de plazo fijo, que sí
+exige saldo real). Tiene un selector de nivel (Platinum / Gold / Silver / Base) y una tabla por
+activo con tres columnas: **Rendimiento Flexible** (con "Hasta", es el techo — para USDT/USDC no
+muestra un segundo número "por encima de $X" como sí tienen BTC/ETH, así que no hay escalón
+oculto en esos dos), **Rendimiento a Plazo** (sin "Hasta" — es un número plano, garantizado,
+igual sea cual sea el monto) y **Bonificación de rendimientos en Nexo** (extra si se acepta
+cobrar el interés en token NEXO en vez de en la moneda depositada, constante en +2% para
+USDT/USDC en los cuatro niveles).
 
-- **Los badges "Ganá hasta X%" que muestra la app logueada son el mismo máximo de Platinum**
-  que ve un visitante sin cuenta — no cambian por tener sesión iniciada ni por el nivel real.
-- **Nivel confirmado por API**, no por UI: `POST /api/platform/loyalty/v1/tiers` (sin body)
-  devuelve `tiers[].name` con los 4 niveles (`base`, `silver`, `gold`, `platinum`); no trae
-  `min_usd_balance` — el umbral real no vive ahí, se calcula en otro lado.
-- **La confirmación de tasa por nivel no está en ningún endpoint público del propio front.**
-  Se probaron `loyalty/v1/rates`, `loyalty/v1/config`, `earn/v1/rates`, `savings/v1/rates`,
-  `fincore/v1/interest-rates` — todos devuelven la SPA (HTML) en vez de datos, es decir, no
-  son rutas reales de API.
-- **Hallazgo real: el "hasta 13% en USDC / 7,5% en ETH"** que aparece en el modal de fidelización
-  (`Mejora tu experiencia en Nexo`) **no es la tasa estándar de Platinum** — el propio modal
-  aclara "Habilitá 'Ganar en NEXO' para potenciar aún más la generación de intereses": ese % más
-  alto exige aceptar el interés pagado **en token NEXO**, no en la moneda depositada. Es un
-  mecanismo distinto (exposición al token de la plataforma), no comparable línea a línea con el
-  11,50%/10,50% ya verificado en la página pública.
-- **Trampa de automatización:** los `<span>` de texto en React a veces no responden a un click
-  por coordenadas de pantalla ni por `ref.click()` de accesibilidad — hace falta
-  `document.querySelectorAll` + `.click()` sobre el nodo de texto exacto para disparar el
-  handler.
-- **Trampa de API:** `fetch()` a rutas `/api/1/*` con **GET** devuelve `access denied` (HTML);
-  las mismas rutas con **POST** y body `{}` sí funcionan (`get_balances` confirmado así).
+**Corrección importante sobre un dato que veníamos arrastrando mal:** el 5,50% que en ediciones
+anteriores del reporte figuraba como "Nexo Base flexible" era en realidad el de **Plazo Fijo**.
+La tasa Flexible real de Base es **7,50%** — más alta, no más baja, que lo que se venía
+comparando contra Binance.
 
-**No se pudo cerrar:** la tasa real de Base para USDT/USDC, ni la de Platinum sin el boost de
-NEXO. La cuenta usada para probar tiene saldo 0, lo que bloquea llegar a la pantalla real de
-creación de plazo fijo (cualquier click en la fila del activo abre "Recibir", no "Ganar").
+| Nivel | USDT Flexible | USDT Plazo Fijo | USDC Flexible | USDC Plazo Fijo |
+|---|---|---|---|---|
+| Base | 7,50 % | 5,50 % | 6,50 % | 4,50 % |
+| Silver | 8,25 % | 6,00 % | 7,25 % | 5,00 % |
+| Gold | 9,50 % | 6,50 % | 8,50 % | 5,50 % |
+| Platinum | 11,50 % | 7,50 % | 10,50 % | 6,50 % |
+
+**Por qué Plazo Fijo rinde *menos* que el techo de Flexible, en todos los niveles:** el mismo
+patrón que Binance con el escalón de 200 unidades — "Flexible: hasta X%" es el titular de
+marketing; "Plazo Fijo" es el número plano y real que cualquier monto cobra si lo bloqueás. No
+es que lockear pague menos que no lockear — es que el "hasta" de Flexible no es lo que se cobra
+en la práctica, otra vez.
+
+**Cómo se llegó:** se abrió el widget de chat de soporte (Salesforce Embedded Service,
+`nexoio.my.site.com`) — automatizarlo por coordenadas de pantalla no funcionó (el iframe está en
+una posición de página que no coincide con lo que se ve en la captura, un desfasaje de escala
+que no se pudo resolver con clicks). El usuario le escribió directamente a "Nora" (la IA de
+soporte) preguntando la tasa Base de USDT/USDC, y la respuesta incluyó el link a
+`/savings-breakdown` con la tabla completa. **Ese link es el atajo — no hace falta pasar por el
+chat de nuevo, se puede ir directo si hay sesión iniciada.**
+
+**Hallazgos previos que quedan documentados como intentos fallidos** (por si algún mes esta
+fuente deja de andar y hay que volver a buscar):
+- Los badges "Ganá hasta X%" en el resto de la app logueada son el mismo máximo de Platinum que
+  ve un visitante sin cuenta — no cambian por nivel real ni por tener sesión iniciada.
+- Nivel confirmable por API: `POST /api/platform/loyalty/v1/tiers` (sin body) devuelve
+  `tiers[].name` con los 4 niveles; no trae la tasa.
+- `loyalty/v1/rates`, `loyalty/v1/config`, `earn/v1/rates`, `savings/v1/rates`,
+  `fincore/v1/interest-rates` devuelven la SPA (HTML), no son rutas reales.
+- `fetch()` a `/api/1/*` con **GET** devuelve `access denied`; con **POST** y body `{}` sí
+  funciona.
+- La pantalla real de creación de plazo fijo exige saldo > 0 — con saldo 0 cualquier click en la
+  fila del activo abre "Recibir", no "Ganar".
 
 ### Términos y campañas
 
@@ -179,11 +199,38 @@ cada uno con `directo` y `tna`.
 > presentar esto como "tasa de hoy".** Usar `fecha_base` del propio JSON para fechar el dato, no
 > la fecha que se pidió.
 
-**Hay una versión diaria y no se pudo usar.** `https://api.pub.cafci.org.ar/pb_get` devuelve una
-planilla XLSX con variación de cuotaparte día a día, genuinamente fresca — pero está en un
-subdominio distinto (`api.pub` vs `estadisticas`) sin CORS habilitado entre ellos, y la navegación
-directa dispara una descarga en vez de una respuesta legible. Requeriría parsear XLSX fuera del
-navegador. **Queda como mejora futura, no como hueco cerrado ni estimado.**
+**Hay una versión diaria, y sí se puede usar — pero no desde el navegador.**
+`https://api.pub.cafci.org.ar/pb_get` devuelve una planilla XLSX con variación de cuotaparte
+día a día, genuinamente fresca. Está en un subdominio distinto (`api.pub` vs `estadisticas`) sin
+CORS habilitado entre ellos, así que un `fetch()` desde el navegador falla — **pero CORS es una
+restricción del navegador, no del servidor.** Un pedido directo (`curl`, `Invoke-WebRequest`,
+cualquier cosa fuera de un contexto de página web) lo baja sin problema:
+
+```bash
+curl -sS "https://api.pub.cafci.org.ar/pb_get" -o planilla.xlsx
+```
+
+Devuelve `20260821_Planilla_Diaria_A.xlsx` (nombre con la fecha del dato, ~950 KB). Se parsea con
+`openpyxl` (Python).
+
+> **Encabezado en dos filas superpuestas — no asumir columnas por posición sin verificar.** La
+> fila 8 (headers principales) y la fila 9 (sub-headers) se combinan: la columna 1 dice
+> "Clasificación" en la fila 8 pero en la práctica trae "Moneda" (ARS/USD) según la fila 9. La
+> columna que importa es la **7: "Variac. % (día)"** — la variación de la cuotaparte de hoy
+> contra ayer. Verificarlo imprimiendo ambas filas de encabezado junto a una fila de datos antes
+> de confiar en el índice.
+
+> **La sección se ubica por nombre, no por posición fija.** Las ~4.300 filas están agrupadas por
+> categoría con una fila de header de una sola celda (ej. `"Mercado de Dinero Peso Argentina"`).
+> Buscarla dinámicamente, no hardcodear el número de fila — cambia mes a mes según cuántos fondos
+> haya en las categorías anteriores.
+
+**Fórmula:** `TNA = variación_diaria × 365`, `TEA = (1 + variación_diaria)^365 − 1`. Para un
+número de mercado (no de un solo fondo), ponderar por patrimonio (columna 14) sobre los fondos
+`Tipo de Dinero` que empiezan con "Cl" (Clásico, no Dinámico) y `Moneda = ARS`. Verificado
+2026-08-24: 165 fondos, patrimonio ARS 47,1 billones, variación diaria ponderada 0,0544 % →
+TNA 19,86 % / TEA 21,97 % (dato del 21-08-2026, tres días de atraso por el ciclo de publicación,
+no tres semanas como con el ranking mensual).
 
 ### LECAPs — precio en vivo + TEM publicada
 

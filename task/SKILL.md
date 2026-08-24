@@ -33,11 +33,18 @@ Si un dato no se pudo verificar, marcalo como hueco abierto. **Nunca lo estimes 
 ## Pasos
 
 1. **Traé los datos** con el navegador. Para las llamadas `bapi/*` de Binance navegá primero a
-   `https://www.binance.com/en/earn/simple-earn` o fallan por CORS. Para Nexo navegá a
-   `https://nexo.com/es-ar/earn-crypto/usdt` y extraé el payload RSC con el regex de `sources.md`
-   (`fixedRate` es el **incremento**, no la tasa total). Sumá dólar (dolarapi.com), IPC del INDEC,
-   CPI de EE.UU., precios BTC/ETH, **tasas en pesos del BCRA** (`v4.0`, ojo con el anidado
-   `results[0].detalle[]`) y **comisiones de retiro** (`getNetworkCoinAll`).
+   `https://www.binance.com/en/earn/simple-earn` o fallan por CORS. Para los máximos públicos de
+   Nexo (sin login) navegá a `https://nexo.com/es-ar/earn-crypto/usdt` y extraé el payload RSC con
+   el regex de `sources.md` (`fixedRate` es el **incremento**, no la tasa total). **Para la tasa
+   real de Nexo por nivel** —esto ya no es un hueco— andá directo a
+   `https://platform.nexo.com/savings-breakdown` con sesión iniciada, elegí el nivel de `.env`
+   (`NEXO_NIVEL`) y leé las columnas Flexible/Plazo Fijo/Bonificación por activo (ver `sources.md`
+   para la tabla completa por nivel y la trampa del "Rendimiento a Plazo" que rinde menos que el
+   techo de Flexible). Sumá dólar (dolarapi.com), IPC del INDEC, CPI de EE.UU., precios BTC/ETH,
+   **tasas en pesos del BCRA** (`v4.0`, ojo con el anidado `results[0].detalle[]`), **FCI money
+   market diario** (`curl` directo a `api.pub.cafci.org.ar/pb_get`, CORS no aplica fuera del
+   navegador — parsear con `openpyxl`, ver `sources.md` para el mapeo de columnas) y **comisiones
+   de retiro** (`getNetworkCoinAll`).
 
 2. **Calculá el rendimiento efectivo** sobre el monto de `.env`, aplicando el escalón:
    `efectivo = (200 × APR_cartel + (monto − 200) × marketApr) / monto`.
