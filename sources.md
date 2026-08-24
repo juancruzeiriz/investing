@@ -134,9 +134,54 @@ GET https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/{id}?limit=1 # último 
 honesta es la TEA: `TEA = (1 + TNA/12)^12 − 1`. Con TNA 21,08% la TEA es 23,24% — más de dos
 puntos de diferencia que se pierden si se compara la TNA contra un rendimiento anual.
 
-**FCI money market y LECAPs: hueco abierto.** No se encontró fuente pública sin login que
-publique el rendimiento de FCI de liquidez inmediata ni el de las letras. Se marca como hueco,
-no se estima.
+### FCI money market — CAFCI
+
+```
+GET https://estadisticas.cafci.org.ar/v2/fondos-mercado-de-dinero.json?fecha=YYYY-MM-DD
+```
+
+Sin auth. Devuelve `clases[]` con `rendimientos.{dia,dias_7,dias_30,dias_90,dias_180,meses_12,ytd}`,
+cada uno con `directo` y `tna`.
+
+> **El parámetro `fecha` es cosmético.** Probado con fechas del 20 al 23 de agosto de 2026: todas
+> devolvieron `fecha_base: "2026-07-31"`. Es el ranking RG1121, que se actualiza **una vez por
+> mes**, no a diario. `fechas_disponibles[]` lo confirma — solo hay un valor por mes. **Nunca
+> presentar esto como "tasa de hoy".** Usar `fecha_base` del propio JSON para fechar el dato, no
+> la fecha que se pidió.
+
+**Hay una versión diaria y no se pudo usar.** `https://api.pub.cafci.org.ar/pb_get` devuelve una
+planilla XLSX con variación de cuotaparte día a día, genuinamente fresca — pero está en un
+subdominio distinto (`api.pub` vs `estadisticas`) sin CORS habilitado entre ellos, y la navegación
+directa dispara una descarga en vez de una respuesta legible. Requeriría parsear XLSX fuera del
+navegador. **Queda como mejora futura, no como hueco cerrado ni estimado.**
+
+### LECAPs — precio en vivo + TEM publicada
+
+```
+GET https://data912.com/live/arg_notes
+```
+
+Sin auth, CORS abierto, límite 120 req/min. Devuelve precio bid/ask en vivo por ticker
+(`symbol`, `px_bid`, `px_ask`, `c`) para más de 20 letras, LECAPs incluidas — filtrar por el
+patrón de ticker `S{día}{mes en letra}{año}` (ej. `S15S6` = vence 15-sep-2026). **Da precio, no
+tasa** — la TIR hay que calcularla contra el valor de rescate, que no viene en la respuesta.
+
+```
+GET https://www.rava.com/perfil/{TICKER}
+```
+
+Página pública, sin login. **La TEM (Tasa Efectiva Mensual) viene en el `<title>`**, no en el
+cuerpo — ej. `S15S6 LECAP $ TEM 1,99% Vto. 15.09.2026 $105,63`. Suficiente para leer el dato sin
+parsear la tabla completa, que carga por JS. No hay endpoint que liste todos los tickers de una:
+hay que conocer el ticker de antemano (sacarlo de `data912.com`) y consultar rava uno por uno.
+
+> **La curva de TEM no sale monótona ni prolija.** Verificado 2026-08-23: S15S6 (23 días) 1,99%,
+> S30S6 (38 días) 2,53%, S13N6 (82 días) 2,10%. No es un error de lectura — es así como cotiza
+> cada letra según su propia demanda. No "corregir" el dato para que parezca una curva suave.
+
+**Riesgo que no tiene el plazo fijo bancario:** la TEM solo se realiza si se mantiene hasta el
+vencimiento. Vender antes expone a riesgo de precio de mercado, además del riesgo soberano
+(es deuda del Tesoro). El plazo fijo bancario no tiene riesgo de precio si se mantiene el plazo.
 
 ---
 
