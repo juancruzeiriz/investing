@@ -46,6 +46,14 @@ Si un dato no se pudo verificar, marcalo como hueco abierto. **Nunca lo estimes 
    navegador — parsear con `openpyxl`, ver `sources.md` para el mapeo de columnas) y **comisiones
    de retiro** (`getNetworkCoinAll`).
 
+1c. **Traé los datos de IOL/CEDEARs** — ya no es referencia estática, se re-verifica cada mes
+   igual que Binance y Nexo. Dos páginas públicas, sin login (ver `sources.md` para el detalle):
+   `iol.invertironline.com/mercado/cotizaciones/argentina/cedears/todos` para spreads reales
+   (compra/venta) de CEDEARs puntuales, y `invertironline.com/tarifas` para la comisión vigente.
+   **La comisión depende del volumen operado en el mes anterior** (Gold/Platinum/Black) — no es
+   un número fijo. Recalculá el costo ida y vuelta del perfil Gold (el default,
+   `(comisión + 0,05%×1,21) × 2`) en vez de reusar el de la edición anterior sin chequear.
+
 2. **Calculá el rendimiento efectivo** sobre el monto de `.env`, aplicando el escalón:
    `efectivo = (200 × APR_cartel + (monto − 200) × marketApr) / monto`.
    Calculá los puntos de cruce contra BFUSD y RWUSD.
@@ -142,6 +150,8 @@ Si un dato no se pudo verificar, marcalo como hueco abierto. **Nunca lo estimes 
   dolarizada. Es el dato que más distorsiona la percepción de urgencia.
 - Si Nexo cambió el Anexo III o el proveedor Earn dejó de ser Keystone Capital Fund Inc. (Panamá),
   eso es alerta de máxima prioridad.
+- Si la tarifa de IOL para el perfil Gold cambió, o el umbral de volumen para pasar a Platinum se
+  movió, es alerta — afecta el costo real de cualquier operación en CEDEARs.
 - Cerrá recordando que asignación y estructura fiscal ameritan asesor matriculado (AAGI de CNV) y contador.
 
 Al terminar, resumen de cinco líneas: rendimiento real, qué cambió, alertas, huecos abiertos y el link al tablero.

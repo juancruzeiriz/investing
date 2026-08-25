@@ -152,6 +152,49 @@ root `c-sc-article-content` vacío y un `c-sc-geofence`. No perder tiempo ahí.
 
 ---
 
+## IOL / CEDEARs
+
+**Verificado 2026-08-24.** IOL tiene API oficial (`invertironline.com/documentacion-api`) pero
+requiere cuenta habilitada previamente — no sirve para un chequeo sin login. **No hace falta**:
+hay dos páginas públicas, sin auth, que dan todo lo necesario.
+
+### Cotizaciones en vivo — sin login
+
+```
+GET https://iol.invertironline.com/mercado/cotizaciones/argentina/cedears/todos
+```
+
+Página pública (no es JSON, es HTML server-rendered — no hay una llamada XHR/fetch separada que
+interceptar, la tabla viene en el HTML de la respuesta). Se actualiza **cada 20 minutos**.
+Columnas: Símbolo, Último, Variación Diaria, Compra (cantidad/precio), Venta (cantidad/precio),
+Apertura, Mínimo, Máximo, Cierre, Monto Operado. Paginada (~19 páginas con "Todos"). El precio de
+Compra y Venta da el spread real de cada CEDEAR — eso es lo que hay que citar, no un promedio.
+
+### Comisiones — tarifario público, sin login
+
+```
+GET https://www.invertironline.com/tarifas
+```
+
+> **La comisión no es un número fijo — depende del volumen operado en el mes anterior**, y el
+> reporte venía citando "~0,5%" sin esa salvedad.
+
+| Perfil | Volumen mensual | Comisión Acciones/CEDEARs/Bonos/ONs/Opciones |
+|---|---|---|
+| Gold *(default)* | $0 – $7.500.000 | 0,5 % |
+| Platinum | $7.500.001 – $50.000.000 | 0,3 % |
+| Black | $50.000.001 en adelante | 0,1 % |
+| **Referido por AP/AAGI/otros** | no aplica por volumen | **hasta 1 %** — el doble del Gold, sin importar cuánto operes |
+
+**Derechos de mercado** (siempre se suman, no están incluidos en la comisión): Acciones y
+CEDEARs, **0,05 % + IVA**. Ida y vuelta completa para el perfil Gold (el que tiene la mayoría):
+`(0,5% + 0,05%×1,21) × 2 ≈ 1,12%` — no el "~1%" que se venía citando de memoria.
+
+> **Costo oculto que no estaba documentado: conversión de CEDEARs.** Cancelación US$0,03 por
+> CEDEAR, emisión US$0,01 por CEDEAR, mínimo US$10 + IVA. Aplica cuando el CEDEAR se convierte
+> contra la acción subyacente (no en una compra/venta normal en el mercado local) — poco frecuente
+> para un inversor retail, pero si pasa, sorprende.
+
 ## Macro
 
 | Dato | Fuente |
