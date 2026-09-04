@@ -81,6 +81,7 @@ arranca sin memoria de la conversación que la creó.
 | Ruta | Qué es | Commiteado |
 |---|---|---|
 | `sources.md` | Endpoints verificados y sus trampas | Sí |
+| `marcos-de-analisis.md` | Lentes de lectura de libros de finanzas/economía (parafraseados) | Sí |
 | `task/SKILL.md` | Prompt de la tarea mensual | Sí |
 | `.env.example` | Plantilla de configuración | Sí |
 | `.env` | Tenencias, montos y webhook | **No** |

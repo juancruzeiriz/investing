@@ -12,6 +12,14 @@ Leé primero:
 - `D:\workspace\investing\.env` — tenencias, aporte mensual, webhook y `ARTIFACT_URL`. **Nunca
   copies valores de este archivo a nada que se commitee: el repo es público.**
 - `D:\workspace\investing\sources.md` — los endpoints exactos y sus trampas.
+- `D:\workspace\investing\marcos-de-analisis.md` — lentes de lectura (riesgo, costos, liquidez,
+  psicología del inversor, calidad contable, etc.) sacados de libros de finanzas/economía y
+  parafraseados por Juan. **Son lentes para leer los datos, no una fuente de recomendaciones.**
+  Usalos para enriquecer la sección de análisis (por ejemplo: si una tasa parece generosa,
+  aplicar el eje 7 y preguntar qué parte compensa riesgo de default; si un producto promete
+  rendimiento sin volatilidad visible, aplicar el eje 1). Nunca cites una oración textual de ese
+  archivo de más de 15 palabras, y nunca lo uses para decir qué comprar — eso sigue prohibido
+  sin excepción (ver Alcance).
 - El reporte más reciente en `D:\workspace\investing\reports\` para poder hacer el diff.
 
 ## Alcance — la línea, no la cruces
@@ -152,6 +160,13 @@ Si un dato no se pudo verificar, marcalo como hueco abierto. **Nunca lo estimes 
   eso es alerta de máxima prioridad.
 - Si la tarifa de IOL para el perfil Gold cambió, o el umbral de volumen para pasar a Platinum se
   movió, es alerta — afecta el costo real de cualquier operación en CEDEARs.
+- **Todo rendimiento se acompaña de su riesgo de contraparte en la misma línea**, no en un párrafo
+  aparte (`marcos-de-analisis.md`, eje 7).
+- **Toda tasa lleva fecha y hora de verificación, y la fuente concreta** — nunca un número sin
+  saber de cuándo es (`marcos-de-analisis.md`, reglas de redacción).
+- **Todo producto lleva declarado su plazo de rescate y su penalidad de salida junto a la tasa**
+  — la iliquidez es un riesgo aparte del riesgo de precio, y no se ve en el número
+  (`marcos-de-analisis.md`, eje 11).
 - Cerrá recordando que asignación y estructura fiscal ameritan asesor matriculado (AAGI de CNV) y contador.
 
 Al terminar, resumen de cinco líneas: rendimiento real, qué cambió, alertas, huecos abiertos y el link al tablero.
